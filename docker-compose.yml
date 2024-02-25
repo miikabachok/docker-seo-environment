@@ -1,0 +1,55 @@
+networks:
+  docker-seo-environment:
+
+services:
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    ports:
+      - 8081:80
+    volumes:
+      - ./project:/var/www/html
+    working_dir: /var/www/html
+    depends_on:
+      - mysql
+      - php
+    networks:
+      - docker-seo-environment
+  mysql:
+    build: ./mysql
+    container_name: mysql
+    ports:
+      - 3307:3306
+    volumes:
+      - ./mysql/var/lib/mysql:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - TZ=${APP_TIMEZONE}
+    networks:
+      - docker-seo-environment
+  php:
+    build: ./php
+    container_name: php
+    ports:
+      - 9000:9000
+    volumes:
+      - ./project:/var/www/html
+    working_dir: /var/www/html
+    networks:
+      - docker-seo-environment
+  mongodb:
+    build: ./mongodb
+    container_name: mongodb
+    ports:
+      - 27018:27017
+    volumes:
+      - mongodb-data-db:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=${MONGO_DB_DATABASE}
+      - MONGODB_INITDB_ROOT_USERNAME=${MONGO_DB_USERNAME}
+      - MONGODB_INITDB_ROOT_PASSWORD=${MONGO_DB_PASSWORD}
+    networks:
+      - docker-seo-environment
+volumes:
+  mongodb-data-db:
